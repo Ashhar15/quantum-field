@@ -1,7 +1,11 @@
+// quantum-field/server/index.ts
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import { handleDemo } from "./routes/demo";
+import { handleRegister } from "./routes/register";
+import { handleDashboard } from "./routes/dashboard";
+import { handleTeacherDashboard } from "./routes/teacherDashboard"; // Corrected filename
 
 export function createServer() {
   const app = express();
@@ -18,6 +22,15 @@ export function createServer() {
   });
 
   app.get("/api/demo", handleDemo);
+
+  // Add this line to register the new route
+  app.post("/api/register", handleRegister);
+
+  // Add this line for the dashboard route
+  app.get("/api/dashboard", handleDashboard);
+
+  // Add this line for the new teacher dashboard route
+  app.get("/api/teacher-dashboard", handleTeacherDashboard);
 
   return app;
 }

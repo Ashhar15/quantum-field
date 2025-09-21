@@ -10,3 +10,58 @@
 export interface DemoResponse {
   message: string;
 }
+
+export interface RegisterRequest {
+  email: string;
+  password?: string;
+  fullName: string;
+  role: "student" | "teacher";
+  studentId?: string;
+  employeeId?: string;
+  department?: string;
+}
+
+export interface RegisterResponse {
+  success: boolean;
+  message: string;
+}
+
+export interface DashboardResponse {
+  studentDetails: {
+    name: string;
+    studentId: string;
+    phoneNumber: string;
+    email: string;
+    totalAttendance: string;
+    lateAttendance: string;
+    totalAbsent: string;
+    avatarUrl: string;
+  };
+  analytics: {
+    classDays: {
+      monthly: string;
+      present: number;
+      late: number;
+      absent: number;
+    };
+    topStudents: {
+      name: string;
+      attendance: string;
+    }[];
+    attendanceRate: {
+      year: string;
+      months: string[];
+    };
+  };
+}
+
+export interface TeacherDashboardResponse {
+  teacherDetails: {
+    name: string;
+    teacherId: string;
+    phoneNumber: string;
+    email: string;
+    department: string;
+    avatarUrl: string;
+  };
+}

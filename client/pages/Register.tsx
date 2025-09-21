@@ -1,7 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { RegisterRequest, RegisterResponse } from "@shared/api";
 
 export default function Register() {
-  const [selectedRole, setSelectedRole] = useState<"student" | "teacher">("student");
+  const [selectedRole, setSelectedRole] = useState<"student" | "teacher">(
+    "student",
+  );
   const [fullName, setFullName] = useState("");
   const [studentId, setStudentId] = useState("");
   const [employeeId, setEmployeeId] = useState("");
@@ -9,8 +13,9 @@ export default function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const navigate = useNavigate();
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fullName || !email) {
       alert("Please fill in all required fields");
@@ -29,14 +34,37 @@ export default function Register() {
       return;
     }
 
-    console.log("Register attempted", {
-      selectedRole,
+    const registrationData: RegisterRequest = {
+      email,
+      password,
       fullName,
+      role: selectedRole,
       studentId: selectedRole === "student" ? studentId : undefined,
       employeeId: selectedRole === "teacher" ? employeeId : undefined,
       department: selectedRole === "teacher" ? department : undefined,
-      email,
-    });
+    };
+
+    try {
+      const response = await fetch("/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(registrationData),
+      });
+
+      const data: RegisterResponse = await response.json();
+
+      if (data.success) {
+        alert("Registration successful!");
+        navigate("/");
+      } else {
+        alert(`Registration failed: ${data.message}`);
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      alert("An error occurred during registration. Please try again.");
+    }
   };
 
   return (
@@ -60,8 +88,12 @@ export default function Register() {
       <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8 relative z-10">
         <div className="w-full max-w-md mx-auto space-y-6">
           <div className="text-center mb-4">
-            <h1 className="text-4xl md:text-5xl font-serif leading-tight text-black">Create Account</h1>
-            <p className="mt-2 text-sm text-gray-600 font-inter">Join the University Attendance Portal</p>
+            <h1 className="text-4xl md:text-5xl font-serif leading-tight text-black">
+              Create Account
+            </h1>
+            <p className="mt-2 text-sm text-gray-600 font-inter">
+              Join the University Attendance Portal
+            </p>
           </div>
 
           <div className="flex justify-center">
@@ -143,7 +175,9 @@ export default function Register() {
                     onChange={(e) => setDepartment(e.target.value)}
                     className="flex-1 bg-transparent border-none outline-none text-black font-inter text-base"
                   >
-                    <option value="" disabled>Select Department</option>
+                    <option value="" disabled>
+                      Select Department
+                    </option>
                     <option value="Computer Science">Computer Science</option>
                     <option value="Mathematics">Mathematics</option>
                     <option value="Physics">Physics</option>
@@ -196,7 +230,13 @@ export default function Register() {
           </form>
 
           <div className="text-center text-sm font-inter">
-            Already have an account? <a href="/" className="text-attend-blue hover:text-attend-blue-dark underline">Login</a>
+            Already have an account?{" "}
+            <a
+              href="/"
+              className="text-attend-blue hover:text-attend-blue-dark underline"
+            >
+              Login
+            </a>
           </div>
         </div>
       </div>

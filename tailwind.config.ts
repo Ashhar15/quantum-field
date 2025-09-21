@@ -14,10 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        'inter': ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        'inria': ['Inria Sans', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        'jeju': ['JejuMyeongjo', 'Georgia', 'Times New Roman', 'serif'],
-        'javanese': ['Georgia', 'Times New Roman', 'serif'],
+        sans: ['"Inria Sans"', "sans-serif"],
+        serif: ["JejuMyeongjo", "serif"],
+        inter: ["Inter", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -53,22 +52,7 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        sidebar: {
-          DEFAULT: "hsl(var(--sidebar-background))",
-          foreground: "hsl(var(--sidebar-foreground))",
-          primary: "hsl(var(--sidebar-primary))",
-          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
-          accent: "hsl(var(--sidebar-accent))",
-          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
-          border: "hsl(var(--sidebar-border))",
-          ring: "hsl(var(--sidebar-ring))",
-        },
-        'attend-blue': "hsl(var(--attend-blue))",
-        'attend-blue-dark': "hsl(var(--attend-blue-dark))",
-        'attend-green': "hsl(var(--attend-green))",
-        'attend-gray-light': "hsl(var(--attend-gray-light))",
-        'attend-gray-border': "hsl(var(--attend-gray-border))",
-        'attend-gray-bg': "hsl(var(--attend-gray-bg))",
+        'attend-ace-bg': '#f5e8e8',
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -92,10 +76,15 @@ export default {
             height: "0",
           },
         },
+        "scan-line": {
+          "0%": { top: "0%" },
+          "100%": { top: "100%" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "scan-line": "scan-line 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       },
     },
   },
