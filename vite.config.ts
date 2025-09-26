@@ -2,8 +2,6 @@ import { defineConfig, Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
-// Note: We are NOT importing createServer here anymore
-
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
@@ -16,7 +14,11 @@ export default defineConfig(({ mode }) => ({
   build: {
     outDir: "dist/spa",
   },
-  plugins: [react(), expressPlugin()],
+  plugins: [
+    react(),
+    // Only use the express plugin in development mode
+    mode === "development" && expressPlugin(),
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./client"),
