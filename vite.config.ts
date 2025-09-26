@@ -2,7 +2,9 @@ import { defineConfig, Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
-export default defineConfig(({ mode }) => ({
+// Note: We are NOT importing createServer here anymore
+
+export default defineConfig({
   server: {
     host: "::",
     port: 8080,
@@ -14,23 +16,20 @@ export default defineConfig(({ mode }) => ({
   build: {
     outDir: "dist/spa",
   },
-  plugins: [
-    react(),
-    // Only use the express plugin in development mode
-    mode === "development" && expressPlugin(),
-  ],
+  plugins: [react(), expressPlugin()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./client"),
       "@shared": path.resolve(__dirname, "./shared"),
     },
   },
-}));
+});
 
 function expressPlugin(): Plugin {
   return {
     name: "express-plugin",
-    apply: "serve",
+    // This is the key change: the plugin only applies during 'serve' command
+    apply: "serve", 
     async configureServer(server) {
       // We dynamically import the server here, inside the hook
       const { createServer } = await import("./server/index.ts");
