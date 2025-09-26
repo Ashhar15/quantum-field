@@ -1,4 +1,3 @@
-// quantum-field/client/pages/TeacherDashboard.tsx
 import {
   Bell,
   ChevronDown,
@@ -12,13 +11,15 @@ import {
   BarChart2,
   QrCode,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { TeacherDashboardResponse } from "@shared/api";
 
 export default function TeacherDashboard() {
   const [dashboardData, setDashboardData] =
     useState<TeacherDashboardResponse | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,6 +28,9 @@ export default function TeacherDashboard() {
         const response = await fetch("/api/teacher-dashboard");
         const data: TeacherDashboardResponse = await response.json();
         setDashboardData(data);
+        if (data.teacherDetails.avatarUrl) {
+          setAvatarPreview(data.teacherDetails.avatarUrl);
+        }
       } catch (error) {
         console.error("Failed to fetch teacher dashboard data:", error);
       }
@@ -34,6 +38,39 @@ export default function TeacherDashboard() {
 
     fetchData();
   }, []);
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+      
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      try {
+        const response = await fetch('/api/upload-avatar', {
+          method: 'POST',
+          body: formData,
+        });
+        const result = await response.json();
+        if (result.success) {
+          console.log('Avatar uploaded successfully:', result.avatarUrl);
+        } else {
+          console.error('Avatar upload failed:', result.message);
+        }
+      } catch (error) {
+        console.error('Error uploading avatar:', error);
+      }
+    }
+  };
 
   if (!dashboardData) {
     return <div>Loading...</div>;
@@ -141,8 +178,19 @@ export default function TeacherDashboard() {
             Teacher Details
           </h3>
           <div className="flex flex-col items-center">
-            <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mb-4">
-              <User className="w-16 h-16 text-gray-500" />
+            <div className="relative w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center mb-4 cursor-pointer" onClick={handleAvatarClick}>
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileChange} 
+                className="hidden" 
+                accept="image/*"
+              />
+              {avatarPreview ? (
+                <img src={avatarPreview} alt="Avatar Preview" className="w-full h-full rounded-full object-cover" />
+              ) : (
+                <User className="w-16 h-16 text-gray-500" />
+              )}
             </div>
             <div className="text-center text-lg space-y-2">
               <p className="font-semibold text-xl">{teacherDetails.name}</p>

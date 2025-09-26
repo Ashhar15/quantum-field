@@ -12,7 +12,7 @@ import {
   BarChart2,
   QrCode,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { DashboardResponse } from "@shared/api";
 import { useNavigate } from "react-router-dom";
 
@@ -20,6 +20,8 @@ export default function Dashboard() {
   const [dashboardData, setDashboardData] = useState<DashboardResponse | null>(
     null
   );
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,6 +30,9 @@ export default function Dashboard() {
         const response = await fetch("/api/dashboard");
         const data: DashboardResponse = await response.json();
         setDashboardData(data);
+        if (data.studentDetails.avatarUrl) {
+          setAvatarPreview(data.studentDetails.avatarUrl);
+        }
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
       }
@@ -35,6 +40,41 @@ export default function Dashboard() {
 
     fetchData();
   }, []);
+  
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+
+      const formData = new FormData();
+      formData.append('avatar', file);
+
+      try {
+        const response = await fetch('/api/upload-avatar', {
+          method: 'POST',
+          body: formData,
+        });
+        const result = await response.json();
+        if (result.success) {
+          console.log('Avatar uploaded successfully:', result.avatarUrl);
+          // Here you would typically update the user's avatar in the database
+        } else {
+          console.error('Avatar upload failed:', result.message);
+        }
+      } catch (error) {
+        console.error('Error uploading avatar:', error);
+      }
+    }
+  };
+
 
   if (!dashboardData) {
     return <div>Loading...</div>;
@@ -128,7 +168,7 @@ export default function Dashboard() {
             <div className="flex items-center">
               <img
                 className="w-8 h-8 rounded-full"
-                src={studentDetails.avatarUrl}
+                src={avatarPreview || studentDetails.avatarUrl}
                 alt="User"
               />
               <ChevronDown className="w-4 h-4" />
@@ -143,11 +183,20 @@ export default function Dashboard() {
         <div className="bg-white p-6 rounded-lg shadow-md mb-6">
           <h3 className="text-lg font-semibold mb-4">Student Details</h3>
           <div className="flex items-center mb-4">
-            <img
-              className="w-16 h-16 rounded-full mr-4"
-              src={studentDetails.avatarUrl}
-              alt="Faizul"
-            />
+            <div className="relative w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center mr-4 cursor-pointer" onClick={handleAvatarClick}>
+              <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileChange} 
+                className="hidden" 
+                accept="image/*"
+              />
+              {avatarPreview ? (
+                <img src={avatarPreview} alt="Avatar Preview" className="w-full h-full rounded-full object-cover" />
+              ) : (
+                <User className="w-10 h-10 text-gray-500" />
+              )}
+            </div>
             <div>
               <p className="font-semibold">{studentDetails.name}</p>
               <p className="text-sm text-gray-500">
