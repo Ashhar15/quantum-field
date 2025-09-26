@@ -1,40 +1,33 @@
-import { defineConfig, Plugin } from "vite";
+import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
-// Note: We are NOT importing createServer here anymore
-
 export default defineConfig({
+  root: 'client',
+  publicDir: '../public',
   server: {
     host: "::",
     port: 8080,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+      },
+    },
     fs: {
-      allow: ["./client", "./shared"],
-      deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "server/**"],
+      allow: ["./", "../shared"],
     },
   },
   build: {
-    outDir: "dist/spa",
+    outDir: "../dist/spa",
+    emptyOutDir: true,
   },
-  plugins: [react(), expressPlugin()],
+  plugins: [react()],
   resolve: {
     alias: {
+      // This alias tells Vite how to resolve the '@' path
       "@": path.resolve(__dirname, "./client"),
       "@shared": path.resolve(__dirname, "./shared"),
     },
   },
 });
-
-function expressPlugin(): Plugin {
-  return {
-    name: "express-plugin",
-    // This is the key change: the plugin only applies during 'serve' command
-    apply: "serve", 
-    async configureServer(server) {
-      // We dynamically import the server here, inside the hook
-      const { createServer } = await import("./server/index.ts");
-      const app = createServer();
-      server.middlewares.use(app);
-    },
-  };
-}

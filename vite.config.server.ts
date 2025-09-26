@@ -5,7 +5,8 @@ import path from "path";
 export default defineConfig({
   build: {
     lib: {
-      entry: path.resolve(__dirname, "server/node-build.ts"),
+      // Point the entry to the new unified server/index.ts
+      entry: path.resolve(__dirname, "server/index.ts"),
       name: "server",
       fileName: "production",
       formats: ["es"],
@@ -38,7 +39,7 @@ export default defineConfig({
         entryFileNames: "[name].mjs",
       },
     },
-    minify: false, // Keep readable for debugging
+    minify: false,
     sourcemap: true,
   },
   resolve: {
@@ -48,6 +49,7 @@ export default defineConfig({
     },
   },
   define: {
+    // This ensures the production block in server/index.ts is included in the build
     "process.env.NODE_ENV": '"production"',
   },
 });
